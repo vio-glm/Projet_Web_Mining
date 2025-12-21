@@ -262,6 +262,49 @@ tokenized_wiki_csv = tokenize_csv_file("normalized_wikipedia_lifestyle_corpus.cs
 
 
 
+from collections import Counter
+
+def build_term_document_matrix(documents, min_doc_freq=2, max_doc_freq=None):
+    # Step 1: Build a vocabulary (unique terms across all documents)
+    vocabulary = set(token for tokens in documents.values() for token in tokens)
+
+    # Step 2: Count term frequencies for each document
+    term_frequencies = {doc: Counter(tokens) for doc, tokens in documents.items()}
+
+    # Step 3: Construct the term-document matrix
+    td_matrix = pd.DataFrame(
+        {term: [term_frequencies[doc].get(term, 0) for doc in documents] for term in vocabulary},
+        index = documents.keys()
+    )
+
+    # Step 4: Filter terms that appear in fewer / more than x documents
+    document_frequency = (td_matrix > 0).sum(axis=0)
+
+    if min_doc_freq is not None:
+        td_matrix = td_matrix.loc[:, document_frequency >= min_doc_freq]
+
+    if max_doc_freq is not None:
+        document_frequency = (td_matrix > 0).sum(axis=0)
+        td_matrix = td_matrix.loc[:, document_frequency <= max_doc_freq]
+
+    vocabulary = td_matrix.columns.tolist()
+
+    return td_matrix, vocabulary
+
+
+tokenized_dict = dict(zip(tokenized_wiki_csv['url'], tokenized_wiki_csv['tokenized_text']))
+
+
+print(type(tokenized_dict))  # doit afficher <class 'dict'>
+print(list(tokenized_dict.items())[:2])  # apercu des 2 premiers documents
+
+
+wiki_td_matrix, wiki_vocab = build_term_document_matrix(tokenized_dict, min_doc_freq=2, max_doc_freq=30)
+
+print(wiki_td_matrix.iloc[:10, :10])
+
+
+
 
 
 
