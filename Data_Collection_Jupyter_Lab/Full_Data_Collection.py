@@ -160,12 +160,13 @@ import string
 
 stop_words = list(set(stopwords.words('english'))) + ["'s"]
 stem = nltk.stem.SnowballStemmer("english")
+
 def tokenize_html(text):
     text = text.lower()
     tokens = nltk.word_tokenize(text)
     tokens = [token for token in tokens if token not in string.punctuation]  # remove punctuation
     tokens = [token for token in tokens if token not in stop_words]  # remove stopwords
-    tokens = [stem.stem(token) for token in tokens]  # apply stemming (racinisation)
+    # tokens = [stem.stem(token) for token in tokens]  # apply stemming (racinisation)
     return tokens
 
 
@@ -186,7 +187,7 @@ def tokenize_csv_file(input_csv, output_csv):
 
 
 
-"""
+
 #########################################################################################################################################################################
 
 
@@ -230,44 +231,7 @@ print("Pages founded:", links_wiki[:1])
 
 
 
-
-
-
 # Collection of the corpus of the Wikipedia pages
-
-def get_html_corpus(links):
-    corpus = []
-
-    for link in links:
-        response = fetch_verify_url(link)
-        if response:
-            corpus.append({'url': link, 'html': response.text}) # A dictionary with the url (as the key) and the corpus is created
-        time.sleep(1)
-
-    return corpus
-
-
-
-
-# Stocking the corpus in a csv file
-import csv
-
-def save_to_csv(data, filename):
-    if not data:
-        print("Error : There is no data to save")
-        return
-
-    fieldnames = data[0].keys()  # Detection of the existing colons in the data file
-
-    with open(filename, 'w', newline='', encoding='utf-8') as f:  # Opens the csv file as utf-8
-        writer = csv.DictWriter(f, fieldnames=fieldnames, quoting=csv.QUOTE_ALL)  # Initialising a writer to write the dictionary into the csv file
-        writer.writeheader()  # writes the colons headers
-        writer.writerows(data)  # writes the rows
-
-    print(f"CSV sauvegardé : {filename}")
-
-
-
 
 # Creates a csv file with the Wikipedia pages found previsously (raw html)
 corpus = get_html_corpus(links_wiki[:1])
@@ -275,122 +239,34 @@ save_to_csv(corpus, "wikipedia_lifestyle_corpus.csv")
 
 
 # The csv file is transform into a dataframe pandas to help us manipulate the table
-#import pandas as pd
-#df = pd.read_csv('wikipedia_lifestyle_corpus.csv')  # df is now a table 
-
-# Check if a csv file is already created, if no, it creates one otherwise it doesn't
-import os
-
-if os.path.exists("blogs_corpus.csv"):
-    df = pd.read_csv("blogs_corpus.csv")  # The csv file already exists
-else:
-    corpus = get_html_corpus(links_blogs_total[:10])  # The csv file doesn't exist yet
-    save_to_csv(corpus, "blogs_corpus.csv")
+import pandas as pd
+df = pd.read_csv('wikipedia_lifestyle_corpus.csv')  # df is now a table 
 
 
 
-# This function will clean any html page 
-import re
+links_wiki_total = ["https://en.wikipedia.org/wiki/Lifestyle"]  # start with the main wikipedia page
 
-def clean_html(html):
-    soup = to_soup(html)
+# add links
+for link in links_wiki.values():
+    links_wiki_total.extend(links)
 
-    for tag in soup(['script', 'style', 'noscript']):  # Supress any unessecary tags
-        tag.decompose()
-
-    text = soup.get_text(separator=' ', strip=True)  # Collect all visible text
-    text = re.sub(r'\s+', ' ', text)  # Supress any unecessary spaces
-
-    return text
-
-
-
-
-# Cleans the csv file created previously
-def clean_csv_file(input_csv, output_csv):
-    df = pd.read_csv(input_csv)  # Take the csv file with the raw html as the input
-
-    if 'html' not in df.columns:  # Verify that the html colon exists
-        raise ValueError(f"La colonne 'html' est absente dans {input_csv}")
-
-    df['cleaned_text'] = df['html'].apply(clean_html)  # cleans the html colon
-    df = df[['url', 'cleaned_text']]  # keep the url and text colon (not the raw html)
-
-    df.to_csv(output_csv, index=False, encoding='utf-8')  # creats a new csv file as the output of the function
 
 
 cleaned_wiki_csv = clean_csv_file("wikipedia_lifestyle_corpus.csv", "cleaned_wikipedia_lifestyle_corpus.csv")
 
-
-
-
-# This function normalize any htmlpage
-def normalize_html(text):
-    text = text.lower()  # convert all letters to lowercase
-    text = re.sub(r'\[\d+\]', ' ', text)  # remove reference numbers like [1], [2], etc.
-    text = re.sub(r'[^a-z0-9\s]', ' ', text)  # keep only English letters, numbers, and spaces
-    text = re.sub(r'\s+', ' ', text)  # replace multiple spaces with a single space
-    return text.strip()  # remove leading and trailing spaces
-
-
-
-# Normalizes the csv file created previously
-def normalize_csv_file(input_csv, output_csv):
-    df = pd.read_csv(input_csv)  # Take the csv file with the raw html as the input
-
-    if 'cleaned_text' not in df.columns:  # Verify that the html colon exists
-        raise ValueError(f"La colonne 'html' est absente dans {input_csv}")
-
-    df['normalized_text'] = df['cleaned_text'].apply(normalize_html)  # normalize the cleaned text
-    df = df[['url', 'normalized_text']]  # keep the url and normalized text 
-
-    df.to_csv(output_csv, index=False, encoding='utf-8')  # creats a new csv file as the output of the function
-
-
 normalized_wiki_csv = normalize_csv_file("cleaned_wikipedia_lifestyle_corpus.csv", "normalized_wikipedia_lifestyle_corpus.csv")
-
-
-
-
-# This function tokenize the normalized html
-import nltk
-from nltk.corpus import stopwords
-import string
-#nltk.download('punkt_tab') #: to uncomment if not already downloaded
-#nltk.download('stopwords') #: to uncomment if not already downloaded
-
-stop_words = list(set(stopwords.words('english'))) + ["'s"]
-stem = nltk.stem.SnowballStemmer("english")
-def tokenize_html(text):
-    text = text.lower()
-    tokens = nltk.word_tokenize(text)
-    tokens = [token for token in tokens if token not in string.punctuation]  # remove punctuation
-    tokens = [token for token in tokens if token not in stop_words]  # remove stopwords
-    tokens = [stem.stem(token) for token in tokens]  # apply stemming (racinisation)
-    return tokens
-
-
-
-# Tokenizes the csv file created previously
-def normalize_csv_file(input_csv, output_csv):
-    df = pd.read_csv(input_csv)  # Take the csv file with the raw html as the input
-
-    if 'normalized_text' not in df.columns:  # Verify that the html colon exists
-        raise ValueError(f"La colonne 'html' est absente dans {input_csv}")
-
-    df['tokenized_text'] = df['normalized_text'].apply(tokenize_html)  # cleans the html colon
-    df = df[['url', 'tokenized_text']]  # keep the url and text colon (not the raw html)
-
-    df.to_csv(output_csv, index=False, encoding='utf-8')  # creats a new csv file as the output of the function
-
 
 tokenized_wiki_csv = tokenize_csv_file("normalized_wikipedia_lifestyle_corpus.csv", "tokenized_wikipedia_lifestyle_corpus.csv")
 
 
 
 
+
+
+
+
 #########################################################################################################################################################################
-"""
+
 
 
 
