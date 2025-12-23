@@ -5,9 +5,15 @@ from urllib.parse import urljoin
 from urllib.parse import urlparse
 import time
 import random
+import csv
 import pandas as pd
+import os
 import re
-
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import string
+from collections import Counter
 
 # Useful Fonctions
 
@@ -59,22 +65,20 @@ def filter_links(links, required_keywords=None, domain=None, already_seen=None):
 
 # Collection of the corpus 
 # Collecting the raw corpus
-def get_html_corpus(links):
-    corpus = []
+def get_html_content(links):
+    content = []
 
     for link in links:
         response = fetch_verify_url(link)
         if response:
-            corpus.append({'url': link, 'html': response.text}) # A dictionary with the url (as the key) and the corpus is created
+            content.append({'url': link, 'html': response.text}) # A dictionary with the url (as the key) and the corpus is created
         time.sleep(random.uniform(1,4))
 
-    return corpus
+    return content
 
 
 
 # Stocking the corpus in a csv file
-import csv
-
 def save_to_csv(data, filename):
     if not data:
         print("Error : There is no data to save")
@@ -94,8 +98,6 @@ def save_to_csv(data, filename):
 
 
 # This function will clean any html page 
-import re
-
 def clean_html(html):
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -114,13 +116,15 @@ def clean_html(html):
 def clean_csv_file(input_csv, output_csv):
     df = pd.read_csv(input_csv)  # Take the csv file with the raw html as the input
 
-    if 'html' not in df.columns:  # Verify that the html colon exists
-        raise ValueError(f"The html colon is missing in: {input_csv}")
+    if 'corpus_text' not in df.columns:  # Verify that the html colon exists
+        raise ValueError(f"The corpus column is missing in: {input_csv}")
 
-    df['cleaned_text'] = df['html'].apply(clean_html)  # cleans the html colon
-    df = df[['url', 'cleaned_text']]  # keep the url and text colon (not the raw html)
+    df['cleaned_text'] = df['corpus_text'].apply(clean_html)  # Cleans the html column
+    df = df[['url', 'cleaned_text']]  # Keep the url and text colon (not the raw html)
 
-    df.to_csv(output_csv, index=False, encoding='utf-8')  # creats a new csv file as the output of the function
+    df.to_csv(output_csv, index=False, encoding='utf-8')  # Creats a new csv file as the output of the function
+
+    return df
 
 
 
@@ -129,7 +133,8 @@ def clean_csv_file(input_csv, output_csv):
 def normalize_html(text):
     text = text.lower()  # convert all letters to lowercase
     text = re.sub(r'\[\d+\]', ' ', text)  # remove reference numbers like [1], [2], etc.
-    text = re.sub(r'[^a-z0-9\s]', ' ', text)  # keep only English letters, numbers, and spaces
+    text = re.sub(r'\d+', ' ', text)  # remove all numbers
+    text = re.sub(r'[^a-z\s]', ' ', text)  # keep only English letters and spaces
     text = re.sub(r'\s+', ' ', text)  # replace multiple spaces with a single space
     return text.strip()  # remove leading and trailing spaces
 
@@ -148,25 +153,24 @@ def normalize_csv_file(input_csv, output_csv):
 
     df.to_csv(output_csv, index=False, encoding='utf-8')  # creats a new csv file as the output of the function
 
+    return df
+
 
 
 
 # This function tokenize the normalized html
-import nltk
-from nltk.corpus import stopwords
-import string
-#nltk.download('punkt_tab') #: to uncomment if not already downloaded
-#nltk.download('stopwords') #: to uncomment if not already downloaded
-
 stop_words = list(set(stopwords.words('english'))) + ["'s"]
-stem = nltk.stem.SnowballStemmer("english")
+#stem = nltk.stem.SnowballStemmer("english")
+lemmatizer = WordNetLemmatizer()
 
 def tokenize_html(text):
     text = text.lower()
     tokens = nltk.word_tokenize(text)
     tokens = [token for token in tokens if token not in string.punctuation]  # remove punctuation
     tokens = [token for token in tokens if token not in stop_words]  # remove stopwords
-    # tokens = [stem.stem(token) for token in tokens]  # apply stemming (racinisation)
+    #tokens = [stem.stem(token) for token in tokens]  # apply stemming (racinisation)
+    tokens = [lemmatizer.lemmatize(token) for token in tokens]  # apply lemmatization
+    tokens = [lemmatizer.lemmatize(token, pos='v') for token in tokens]
     return tokens
 
 
@@ -183,7 +187,7 @@ def tokenize_csv_file(input_csv, output_csv):
 
     df.to_csv(output_csv, index=False, encoding='utf-8')  # creats a new csv file as the output of the function
 
-
+    return df
 
 
 
@@ -192,7 +196,7 @@ def tokenize_csv_file(input_csv, output_csv):
 
 
 
-
+"""
 #Scrapping of the lifestyle page of Wikipedia
 
 url_wiki = "https://en.wikipedia.org/wiki/Lifestyle"
@@ -478,6 +482,6 @@ normalized_blogs_csv = normalize_csv_file("cleaned_blogs_corpus.csv", "normalize
 
 tokenized_blogs_csv = tokenize_csv_file("normalized_blogs_corpus.csv", "tokenized_blogs_corpus.csv")
 
-
+"""
 
 
