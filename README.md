@@ -30,7 +30,6 @@ Environnement de développement :
 │   ├── 1_Data_Collection.ipynb         # Scraping (Wikipedia, Blogs, Feedspot)
 │   ├── 2_Text_Mining.ipynb             # Prétraitement + analyse textuelle
 │   ├── 3_Link_Analysis.ipynb           # Construction des graphes + analyse des liens
-│   └── 4_Centrality_PageRank.ipynb     # PageRank, centralités, homophilie
 ├── src/                                # Scripts Python modularisés
 ├── requirements.txt                    # Dépendances
 └── README.md                           # Documentation du projet
