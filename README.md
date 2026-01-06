@@ -23,33 +23,18 @@ Environnement de développement :
 - **Éditeur** : Visual Studio Code
 - **Versioning** : Git et GitHub
 
-## Technologies et Méthodologie
-Le projet suit un pipeline de données complet :
-1. **Collecte** (\data) :
-  - Scraping : BeautifulSoup, Requests, Regex.
-  - Stratégie : Exploration BFS (Breadth-First Search) pour une exploration par couches des blogs avec des filtres pour réduire le bruit. Parsing immédiat des dates (parsing ISO/formats textuels).
-2. **Prétraitement (NLP)** : 
-  - Outils : NLTK, Spacy
-  - Traitement : Nettoyage HTML, Tokenisation, Suppression des Stopwords, Lemmatisation (WordNetLemmatizer) préférée au Stemming pour préserver l'interprétabilité des thèmes.
-3. **Modélisation (Text Mining)** :
-  - Vectorisation : TF-IDF (scikit-learn)
-  - Topic Modeling : LDA (Latent Dirichlet Allocation) pour une modélisation globale et BERTopic pour une analyse fine via embeddings contextuels (Deep Learning).
-4. **Analyse de Graphe (Link Analysis)** : 
-  - Outils : NetworkX
-  - Métriques : PageRank, Centralité de degré (Degree) et d'intermédiarité (Betweenness) et Shortest Path pour l'analyse de la circulation de l'information. 
-
 ## Structure du projet
-```bash
-├── data/                  # Données brutes (HTML) et CSV nettoyés
-├── notebooks/             # Jupyter Notebooks d'expérimentation
-│   ├── 1_Scraping.ipynb   # Scripts de collecte (Wiki + Blogs)
-│   ├── 2_Preprocessing.ipynb # Nettoyage et tokenisation
-│   ├── 3_TextMining.ipynb # LDA, BERTopic, Visualisations
-│   └── 4_LinkAnalysis.ipynb # PageRank, Centralités
-├── src/                   # Scripts Python modularisés
-├── requirements.txt       # Dépendances
-└── README.md              # Documentation
-``` 
+├── data/                               # Données brutes et nettoyées
+├── Data_Collection_Jupyter_Lab/        # Jupyter Notebooks
+│   ├── 1_Data_Collection.ipynb         # Scraping (Wikipedia, Blogs, Feedspot)
+│   ├── 2_Text_Mining.ipynb             # Prétraitement + analyse textuelle
+│   ├── 3_Link_Analysis.ipynb           # Construction des graphes + analyse des liens
+│   └── 4_Centrality_PageRank.ipynb     # PageRank, centralités, homophilie
+├── src/                                # Scripts Python modularisés
+├── requirements.txt                    # Dépendances
+└── README.md                           # Documentation du projet
+
+
 
 ## Auteur.es
 **Violaine GUILLAUME** — **Eurydice HANOT** — **Arshik MEHMETAJ**   
