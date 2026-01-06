@@ -35,7 +35,7 @@ Le projet suit un pipeline de données complet :
   - Vectorisation : TF-IDF (scikit-learn)
   - Topic Modeling : LDA (Latent Dirichlet Allocation) pour une modélisation globale et BERTopic pour une analyse fine via embeddings contextuels (Deep Learning).
 4. **Analyse de Graphe (Link Analysis)** : 
-  - Outils : ???NetworkX???
+  - Outils : NetworkX
   - Métriques : PageRank, Centralité de degré (Degree) et d'intermédiarité (Betweenness) et Shortest Path pour l'analyse de la circulation de l'information. 
 
 ## Structure du projet
