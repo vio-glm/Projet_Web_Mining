@@ -24,6 +24,7 @@ Environnement de développement :
 - **Versioning** : Git et GitHub
 
 ## Structure du projet
+''' bash
 ├── data/                               # Données brutes et nettoyées
 ├── Data_Collection_Jupyter_Lab/        # Jupyter Notebooks
 │   ├── 1_Data_Collection.ipynb         # Scraping (Wikipedia, Blogs, Feedspot)
@@ -33,7 +34,7 @@ Environnement de développement :
 ├── src/                                # Scripts Python modularisés
 ├── requirements.txt                    # Dépendances
 └── README.md                           # Documentation du projet
-
+'''
 
 
 ## Auteur.es
